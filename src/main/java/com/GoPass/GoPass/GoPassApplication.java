@@ -1,13 +1,13 @@
-package com.GoPass.demo;
+package com.GoPass.GoPass;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class DemoApplication {
+public class GoPassApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(DemoApplication.class, args);
+		SpringApplication.run(GoPassApplication.class, args);
 	}
 
 }

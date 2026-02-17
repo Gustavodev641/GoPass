@@ -1,6 +1,6 @@
-package com.GoPass.demo.repositories;
+package com.GoPass.GoPass.repositories;
 
-import com.GoPass.demo.domain.coupon.Coupon;
+import com.GoPass.GoPass.domain.coupon.Coupon;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.UUID;

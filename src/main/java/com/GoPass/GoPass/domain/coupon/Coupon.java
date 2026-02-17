@@ -1,7 +1,7 @@
-package com.GoPass.demo.domain.coupon;
+package com.GoPass.GoPass.domain.coupon;
 
 
-import com.GoPass.demo.domain.event.Event;
+import com.GoPass.GoPass.domain.event.Event;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

@@ -1,4 +1,4 @@
-package com.GoPass.demo.domain.event;
+package com.GoPass.GoPass.domain.event;
 
 
 import jakarta.persistence.*;
