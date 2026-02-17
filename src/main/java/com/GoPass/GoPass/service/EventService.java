@@ -1,9 +1,11 @@
 package com.GoPass.GoPass.service;
 
-
 import com.GoPass.GoPass.domain.event.Event;
 import com.GoPass.GoPass.domain.event.EventRequestDTO;
+import com.GoPass.GoPass.repositories.EventRepository;
 import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.CannedAccessControlList;
+import com.amazonaws.services.s3.model.PutObjectRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -23,50 +25,53 @@ public class EventService {
 
     @Autowired
     private AmazonS3 s3Client;
-    private String filename;
 
-    public Event createEvent(EventRequestDTO data){
-        String imgUrl = (null);
+    @Autowired
+    private EventRepository repository;
 
-        if(data.image() != null){
-            this.uploadImg(data.image());
+    public Event createEvent(EventRequestDTO data) {
+        String imgUrl = null;
+
+        // Verifica se a imagem existe e não está vazia antes de tentar o upload
+        if (data.image() != null && !data.image().isEmpty()) {
+            imgUrl = this.uploadImg(data.image());
         }
+
         Event newEvent = new Event();
         newEvent.setTitle(data.title());
         newEvent.setDescription(data.description());
         newEvent.setEventUrl(data.eventUrl());
         newEvent.setDate(new Date(data.date()));
         newEvent.setImgUrl(imgUrl);
+        newEvent.setRemote(data.remote());
 
-        return newEvent;
+        // Agora o save vai persistir no banco e retornar o objeto com ID e URL
+        return this.repository.save(newEvent);
     }
-    private String uploadImg(MultipartFile multipartFile) {
-        // 1. Defina o nome
-        String imgName = UUID.randomUUID().toString() + "-" + multipartFile.getOriginalFilename();
 
+    public String uploadImg(MultipartFile multipartFile) {
+        String fileName = UUID.randomUUID() + "-" + multipartFile.getOriginalFilename();
         try {
-            // 2. Corrija o nome do método (File com F)
-            File file = this.convertMultipartToDile(multipartFile);
+            File file = this.convertMultipartToFile(multipartFile);
 
-            // 3. Use imgName (o mesmo nome da variável lá de cima)
-            s3Client.putObject(bucketName, imgName, file);
+            // Use o PutObjectRequest para definir o ACL como Público
+            s3Client.putObject(new PutObjectRequest(bucketName, fileName, file)
+                    .withCannedAcl(CannedAccessControlList.PublicRead));
 
-            file.delete();
-
-            // 4. Use imgName aqui também
-            return s3Client.getUrl(bucketName, imgName).toString();
-
+            file.delete(); // Limpa o arquivo temporário
+            return s3Client.getUrl(bucketName, fileName).toString();
         } catch (Exception e) {
-            System.out.println("Erro ao upload img: " + e.getMessage());
+            System.out.println("Erro detalhado: " + e.getMessage());
             return null;
         }
     }
-    private File convertMultipartToDile(MultipartFile multipartFile)throws IOException{
-        File convFile = new File(multipartFile.getOriginalFilename());
+
+    private File convertMultipartToFile(MultipartFile multipartFile) throws IOException {
+        // Correção de segurança: garante que o nome do arquivo original seja usado corretamente
+        File convFile = new File(System.getProperty("java.io.tmpdir") + "/" + multipartFile.getOriginalFilename());
         FileOutputStream fos = new FileOutputStream(convFile);
         fos.write(multipartFile.getBytes());
         fos.close();
         return convFile;
-
     }
 }
