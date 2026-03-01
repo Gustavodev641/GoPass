@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GoPass — Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared.css">
+<style>
+  .admin-page { padding: 44px 0 80px; min-height: calc(100vh - 64px); }
+
+  .page-header {
+    display: flex; align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 40px; gap: 16px;
+  }
+  .admin-tag {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 4px 12px;
+    background: rgba(124,92,252,0.1);
+    border: 1px solid rgba(124,92,252,0.22);
+    border-radius: 100px;
+    font-size: 12px; font-weight: 700;
+    color: var(--primary-light);
+    margin-bottom: 12px;
+    font-family: var(--font-display);
+    letter-spacing: 0.04em;
+  }
+  .page-title {
+    font-family: var(--font-display);
+    font-size: clamp(26px, 4vw, 36px);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+  }
+  .page-sub { color: var(--muted); margin-top: 6px; }
+
+  /* ---- Grid ---- */
+  .admin-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    align-items: start;
+  }
+
+  .panel { padding: 28px 30px; }
+  .panel-title {
+    font-family: var(--font-display);
+    font-size: 19px; font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .panel-sub { font-size: 13px; color: var(--muted); margin-bottom: 24px; }
+
+  /* ---- Create form ---- */
+  .event-form { display: flex; flex-direction: column; gap: 16px; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  .toggle-group { display: flex; gap: 8px; }
+  .mode-btn {
+    flex: 1; padding: 11px;
+    border: 1px solid var(--border);
+    border-radius: var(--r-sm);
+    background: transparent;
+    color: var(--muted);
+    font-size: 14px; font-weight: 500;
+    cursor: pointer;
+    transition: all var(--t);
+    font-family: var(--font-body);
+  }
+  .mode-btn.active {
+    background: var(--primary); border-color: var(--primary); color: #fff;
+  }
+
+  /* File drop */
+  .file-drop {
+    border: 2px dashed var(--border);
+    border-radius: var(--r-md);
+    cursor: pointer;
+    transition: all var(--t);
+    min-height: 130px;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+    position: relative;
+  }
+  .file-drop:hover { border-color: var(--primary); background: rgba(124,92,252,0.03); }
+  .file-drop.drag-over { border-color: var(--primary); background: rgba(124,92,252,0.06); }
+  .drop-inner { text-align: center; padding: 20px; pointer-events: none; }
+  .drop-em { font-size: 36px; margin-bottom: 10px; display: block; }
+  .drop-text { font-size: 14px; color: var(--muted); margin-bottom: 4px; }
+  .drop-hint { font-size: 12px; color: var(--faint); }
+  .preview-wrap { position: relative; width: 100%; }
+  .preview-img { width: 100%; height: 170px; object-fit: cover; display: block; }
+  .remove-preview {
+    position: absolute; top: 8px; right: 8px;
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.7);
+    border: none; color: #fff;
+    font-size: 12px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background var(--t);
+  }
+  .remove-preview:hover { background: var(--accent); }
+
+  .btn-create {
+    width: 100%;
+    justify-content: center;
+  }
+  .spinner-btn {
+    display: none;
+    width: 14px; height: 14px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+  }
+  .loading .spinner-btn { display: inline-block; }
+
+  /* ---- Events list ---- */
+  .events-list { display: flex; flex-direction: column; gap: 8px; }
+  .event-row {
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+    overflow: hidden;
+    transition: border-color var(--t);
+  }
+  .event-row.open { border-color: var(--primary); }
+  .row-header {
+    display: flex; align-items: center; gap: 12px;
+    padding: 13px 16px;
+    cursor: pointer;
+    transition: background var(--t);
+  }
+  .row-header:hover { background: var(--surface-2); }
+  .row-thumb {
+    width: 46px; height: 46px;
+    border-radius: 9px;
+    overflow: hidden;
+    background: var(--surface-2);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    font-family: var(--font-display);
+    font-weight: 800; font-size: 20px;
+    color: var(--primary);
+  }
+  .row-thumb img { width: 100%; height: 100%; object-fit: cover; }
+  .row-info { flex: 1; min-width: 0; }
+  .row-title {
+    font-family: var(--font-display);
+    font-size: 14px; font-weight: 700;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .row-meta { font-size: 12px; color: var(--muted); margin-top: 2px; display: flex; align-items: center; gap: 4px; }
+  .row-chevron { color: var(--faint); font-size: 10px; flex-shrink: 0; transition: transform var(--t); }
+  .event-row.open .row-chevron { transform: rotate(180deg); }
+
+  /* Coupon panel */
+  .coupon-panel {
+    display: none;
+    padding: 16px;
+    border-top: 1px solid var(--border);
+    background: var(--bg);
+  }
+  .event-row.open .coupon-panel { display: block; animation: fadeUp 0.25s ease; }
+  .coupon-label {
+    font-size: 11px; font-weight: 700;
+    color: var(--muted);
+    font-family: var(--font-display);
+    letter-spacing: 0.07em; text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .coupon-fields {
+    display: flex; gap: 8px; flex-wrap: wrap; align-items: flex-end;
+  }
+  .coupon-fields .form-control {
+    flex: 1; min-width: 100px;
+    padding: 9px 12px; font-size: 13px;
+  }
+
+  /* List loading */
+  .list-skeleton { display: flex; flex-direction: column; gap: 8px; }
+  .sk-row { height: 72px; border-radius: var(--r-md); }
+
+  .empty-list {
+    text-align: center; padding: 48px 20px;
+    color: var(--muted); font-size: 14px;
+  }
+
+  @media (max-width: 900px) {
+    .admin-grid { grid-template-columns: 1fr; }
+    .form-row { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 600px) {
+    .coupon-fields { flex-direction: column; }
+    .coupon-fields .form-control { min-width: 100%; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="navbar" id="navbar"></nav>
+
+<div class="admin-page">
+  <div class="container">
+    <div class="page-header">
+      <div>
+        <div class="admin-tag"><span class="admin-dot"></span> Painel Admin</div>
+        <h1 class="page-title">Gestão de Eventos</h1>
+        <p class="page-sub">Crie eventos, gerencie cupons e acompanhe sua vitrine</p>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <a href="admin-dashboard.html" class="btn btn-outline btn-sm">📊 Dashboard</a>
+        <a href="clientes.html" class="btn btn-outline btn-sm">👥 Clientes</a>
+        <a href="dashboard.html" class="btn btn-ghost btn-sm hide-mobile">← Ver vitrine</a>
+      </div>
+    </div>
+
+    <div class="admin-grid">
+
+      <!-- CREATE EVENT -->
+      <div class="card panel">
+        <p class="panel-title">Criar Novo Evento</p>
+        <p class="panel-sub">Preencha os dados e publique imediatamente</p>
+
+        <form class="event-form" id="eventForm" onsubmit="handleCreateEvent(event)">
+
+          <div class="form-group">
+            <label class="form-label">Título *</label>
+            <input type="text" class="form-control" id="evTitle" placeholder="Nome do evento" required />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Descrição</label>
+            <textarea class="form-control" id="evDesc" placeholder="Descreva o evento..."></textarea>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Data e hora *</label>
+              <input type="datetime-local" class="form-control" id="evDate" required />
+            </div>
+            <div class="form-group">
+              <label class="form-label">URL do evento *</label>
+              <input type="url" class="form-control" id="evUrl" placeholder="https://..." required />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Modalidade</label>
+            <div class="toggle-group">
+              <button type="button" class="mode-btn active" id="btnPresencial" onclick="setMode(false)">📍 Presencial</button>
+              <button type="button" class="mode-btn" id="btnRemoto" onclick="setMode(true)">🌐 Remoto</button>
+            </div>
+          </div>
+
+          <div id="locationFields">
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Cidade</label>
+                <input type="text" class="form-control" id="evCity" placeholder="Ex: São Paulo" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Estado</label>
+                <input type="text" class="form-control" id="evState" placeholder="Ex: SP" maxlength="2" style="text-transform:uppercase" />
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Imagem do evento</label>
+            <div class="file-drop" id="fileDrop" onclick="document.getElementById('fileInput').click()"
+              ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event)">
+              <div class="drop-inner" id="dropInner">
+                <span class="drop-em">🖼</span>
+                <p class="drop-text">Clique ou arraste uma imagem aqui</p>
+                <p class="drop-hint">PNG, JPG, WEBP até 10MB</p>
+              </div>
+            </div>
+            <input type="file" id="fileInput" accept="image/*" style="display:none" onchange="onFileSelect(event)" />
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-create" id="createBtn">
+            <span class="spinner-btn"></span>
+            🚀 Publicar Evento
+          </button>
+        </form>
+      </div>
+
+      <!-- EVENTS LIST -->
+      <div class="card panel">
+        <p class="panel-title">Eventos Publicados</p>
+        <p class="panel-sub">Clique em um evento para adicionar cupons de desconto</p>
+        <div id="eventsList">
+          <div class="list-skeleton">
+            <div class="skeleton sk-row"></div>
+            <div class="skeleton sk-row"></div>
+            <div class="skeleton sk-row"></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script src="shared.js"></script>
+<script>
+  // Auth guard
+  const user = getUser();
+  if (!user || user.role !== 'ADMIN') {
+    showToast('Acesso restrito a administradores.', 'error');
+    setTimeout(() => window.location.href = 'login.html', 1200);
+  }
+
+  renderNavbar('admin');
+
+  let isRemote = false;
+  let selectedFile = null;
+
+  // ---- Mode toggle ----
+  function setMode(remote) {
+    isRemote = remote;
+    document.getElementById('btnPresencial').classList.toggle('active', !remote);
+    document.getElementById('btnRemoto').classList.toggle('active', remote);
+    document.getElementById('locationFields').style.display = remote ? 'none' : 'block';
+  }
+
+  // ---- File handling ----
+  function onDragOver(e) { e.preventDefault(); document.getElementById('fileDrop').classList.add('drag-over'); }
+  function onDragLeave(e) { document.getElementById('fileDrop').classList.remove('drag-over'); }
+  function onDrop(e) {
+    e.preventDefault();
+    document.getElementById('fileDrop').classList.remove('drag-over');
+    const file = e.dataTransfer?.files?.[0];
+    if (file && file.type.startsWith('image/')) setPreview(file);
+  }
+  function onFileSelect(e) {
+    const file = e.target.files?.[0];
+    if (file) setPreview(file);
+  }
+  function setPreview(file) {
+    selectedFile = file;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const drop = document.getElementById('fileDrop');
+      drop.innerHTML = `
+        <div class="preview-wrap">
+          <img src="${e.target.result}" class="preview-img" alt="Preview" />
+          <button type="button" class="remove-preview" onclick="removePreview(event)">✕</button>
+        </div>`;
+    };
+    reader.readAsDataURL(file);
+  }
+  function removePreview(e) {
+    e.stopPropagation();
+    selectedFile = null;
+    document.getElementById('fileInput').value = '';
+    document.getElementById('fileDrop').innerHTML = `
+      <div class="drop-inner" id="dropInner">
+        <span class="drop-em">🖼</span>
+        <p class="drop-text">Clique ou arraste uma imagem aqui</p>
+        <p class="drop-hint">PNG, JPG, WEBP até 10MB</p>
+      </div>`;
+  }
+
+  // ---- Create event ----
+  async function handleCreateEvent(e) {
+    e.preventDefault();
+    const btn = document.getElementById('createBtn');
+    btn.disabled = true;
+    btn.classList.add('loading');
+    btn.innerHTML = '<span class="spinner-btn" style="display:inline-block"></span> Publicando...';
+
+    try {
+      const dateTs = new Date(document.getElementById('evDate').value).getTime();
+      const fd = new FormData();
+      fd.append('title', document.getElementById('evTitle').value);
+      fd.append('description', document.getElementById('evDesc').value);
+      fd.append('date', dateTs);
+      fd.append('city', document.getElementById('evCity').value);
+      fd.append('state', document.getElementById('evState').value.toUpperCase());
+      fd.append('remote', isRemote);
+      fd.append('eventUrl', document.getElementById('evUrl').value);
+      if (selectedFile) fd.append('image', selectedFile);
+
+      const created = await createEvent(fd);
+      showToast(`Evento "${created.title}" publicado!`);
+      document.getElementById('eventForm').reset();
+      removePreview({ stopPropagation: () => {} });
+      setMode(false);
+      loadEventsList();
+    } catch (err) {
+      showToast('Erro ao criar evento. Verifique o back-end.', 'error');
+    } finally {
+      btn.disabled = false;
+      btn.classList.remove('loading');
+      btn.innerHTML = '<span class="spinner-btn"></span>🚀 Publicar Evento';
+    }
+  }
+
+  // ---- Events list ----
+  let events = [];
+
+  async function loadEventsList() {
+    try {
+      events = await fetchEvents(0, 200);
+      renderEventsList();
+    } catch {
+      document.getElementById('eventsList').innerHTML = `
+        <div class="empty-list">Erro ao carregar. <a href="#" onclick="loadEventsList()" style="color:var(--primary)">Tentar novamente</a></div>`;
+    }
+  }
+
+  function renderEventsList() {
+    const container = document.getElementById('eventsList');
+    if (events.length === 0) {
+      container.innerHTML = '<div class="empty-list">Nenhum evento publicado ainda</div>';
+      return;
+    }
+    container.innerHTML = `<div class="events-list">${events.map(e => eventRowHTML(e)).join('')}</div>`;
+  }
+
+  function eventRowHTML(ev) {
+    const thumb = ev.imgUrl
+      ? `<img src="${ev.imgUrl}" alt="${escHtml(ev.title)}" onerror="this.parentElement.innerHTML='${ev.title[0]}'" />`
+      : ev.title[0];
+    const loc = !ev.remote && ev.city ? ` · ${escHtml(ev.city)}` : '';
+    const badge = ev.remote
+      ? '<span class="badge badge-remote" style="font-size:10px">Remoto</span>'
+      : '<span class="badge badge-presencial" style="font-size:10px">Presencial</span>';
+
+    return `
+      <div class="event-row" id="row-${ev.id}">
+        <div class="row-header" onclick="toggleRow('${ev.id}')">
+          <div class="row-thumb">${thumb}</div>
+          <div class="row-info">
+            <p class="row-title">${escHtml(ev.title)}</p>
+            <p class="row-meta">${formatDate(ev.date)}${loc} ${badge}</p>
+          </div>
+          <span class="row-chevron">▼</span>
+        </div>
+        <div class="coupon-panel">
+          <p class="coupon-label">Adicionar Cupom de Desconto</p>
+          <div class="coupon-fields">
+            <input type="text" class="form-control" id="code-${ev.id}" placeholder="Código (ex: SAVE20)" />
+            <input type="number" class="form-control" id="disc-${ev.id}" placeholder="% Desconto" min="1" max="100" style="max-width:130px" />
+            <input type="date" class="form-control" id="valid-${ev.id}" style="max-width:155px" />
+            <button class="btn btn-primary btn-sm" onclick="handleAddCoupon('${ev.id}')">+ Adicionar</button>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  function toggleRow(id) {
+    const row = document.getElementById(`row-${id}`);
+    const wasOpen = row.classList.contains('open');
+    document.querySelectorAll('.event-row.open').forEach(r => r.classList.remove('open'));
+    if (!wasOpen) row.classList.add('open');
+  }
+
+  async function handleAddCoupon(eventId) {
+    const code = document.getElementById(`code-${eventId}`).value.trim();
+    const disc = parseInt(document.getElementById(`disc-${eventId}`).value);
+    const validStr = document.getElementById(`valid-${eventId}`).value;
+
+    if (!code || !disc || !validStr) { showToast('Preencha todos os campos do cupom.', 'error'); return; }
+
+    try {
+      await addCoupon(eventId, { code, discount: disc, valid: new Date(validStr).getTime() });
+      showToast(`Cupom "${code}" adicionado com sucesso!`);
+      document.getElementById(`code-${eventId}`).value = '';
+      document.getElementById(`disc-${eventId}`).value = '';
+      document.getElementById(`valid-${eventId}`).value = '';
+    } catch {
+      showToast('Erro ao adicionar cupom.', 'error');
+    }
+  }
+
+  function escHtml(str) {
+    if (!str) return '';
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  loadEventsList();
+</script>
+</body>
+</html>

@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GoPass — Dashboard Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared.css">
+<style>
+  .dash-page { padding: 44px 0 80px; }
+
+  /* Header */
+  .dash-header {
+    display: flex; align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 36px; gap: 16px; flex-wrap: wrap;
+  }
+  .admin-tag {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 4px 12px;
+    background: rgba(124,92,252,0.1);
+    border: 1px solid rgba(124,92,252,0.22);
+    border-radius: 100px;
+    font-size: 12px; font-weight: 700;
+    color: var(--primary-light); margin-bottom: 12px;
+    font-family: var(--font-display); letter-spacing: 0.04em;
+  }
+  .dash-title {
+    font-family: var(--font-display);
+    font-size: clamp(24px, 4vw, 36px);
+    font-weight: 800; letter-spacing: -0.03em;
+  }
+  .dash-sub { color: var(--muted); margin-top: 6px; font-size: 14px; }
+  .greeting { color: var(--primary-light); }
+  .header-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+
+  /* KPI cards */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+  .kpi-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-lg);
+    padding: 22px 24px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color var(--t), transform var(--t);
+    cursor: default;
+  }
+  .kpi-card:hover { border-color: var(--border-h); transform: translateY(-2px); }
+  .kpi-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+  }
+  .kpi-card.purple::before { background: var(--primary); }
+  .kpi-card.green::before { background: var(--success); }
+  .kpi-card.orange::before { background: var(--warm); }
+  .kpi-card.red::before { background: var(--accent); }
+
+  .kpi-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+  .kpi-icon {
+    width: 42px; height: 42px;
+    border-radius: 11px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; flex-shrink: 0;
+  }
+  .kpi-badge {
+    font-size: 11px; font-weight: 700;
+    font-family: var(--font-display);
+    padding: 3px 9px; border-radius: 100px;
+  }
+  .badge-up { background: rgba(45,212,160,0.12); color: var(--success); }
+  .badge-down { background: rgba(255,92,92,0.12); color: var(--accent); }
+
+  .kpi-val {
+    font-family: var(--font-display);
+    font-size: 32px; font-weight: 800;
+    letter-spacing: -0.03em; line-height: 1;
+    margin-bottom: 6px;
+  }
+  .kpi-label { font-size: 13px; color: var(--muted); }
+
+  /* Charts row */
+  .charts-row {
+    display: grid;
+    grid-template-columns: 1.6fr 1fr;
+    gap: 20px;
+    margin-bottom: 20px;
+  }
+
+  .chart-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-lg);
+    padding: 24px;
+  }
+  .chart-header {
+    display: flex; align-items: center;
+    justify-content: space-between;
+    margin-bottom: 22px; gap: 12px;
+  }
+  .chart-title {
+    font-family: var(--font-display);
+    font-size: 16px; font-weight: 700;
+  }
+  .chart-sub { font-size: 12px; color: var(--muted); margin-top: 3px; }
+  .chart-legend { display: flex; gap: 14px; align-items: center; }
+  .legend-dot { width: 8px; height: 8px; border-radius: 50%; }
+  .legend-label { font-size: 12px; color: var(--muted); }
+
+  /* Bar chart */
+  .bar-chart { display: flex; align-items: flex-end; gap: 8px; height: 160px; }
+  .bar-col { display: flex; flex-direction: column; align-items: center; gap: 6px; flex: 1; }
+  .bar-wrap { width: 100%; display: flex; align-items: flex-end; justify-content: center; gap: 3px; height: 130px; }
+  .bar {
+    width: 45%;
+    border-radius: 4px 4px 0 0;
+    transition: opacity var(--t), transform var(--t);
+    cursor: pointer;
+    min-height: 4px;
+  }
+  .bar:hover { opacity: 0.8; transform: scaleY(1.03); transform-origin: bottom; }
+  .bar-primary { background: var(--primary); }
+  .bar-success { background: var(--success); opacity: 0.7; }
+  .bar-label { font-size: 10px; color: var(--faint); font-family: var(--font-display); font-weight: 600; text-align: center; }
+
+  /* Donut chart */
+  .donut-wrap { display: flex; align-items: center; justify-content: center; gap: 28px; }
+  .donut-svg { flex-shrink: 0; }
+  .donut-legend { display: flex; flex-direction: column; gap: 10px; }
+  .donut-item { display: flex; align-items: center; gap: 10px; }
+  .donut-color { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
+  .donut-item-label { font-size: 13px; color: var(--muted); }
+  .donut-item-val { font-family: var(--font-display); font-weight: 700; font-size: 14px; margin-left: auto; padding-left: 16px; }
+
+  /* Bottom row */
+  .bottom-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+
+  /* Activity feed */
+  .activity-list { display: flex; flex-direction: column; gap: 0; }
+  .activity-item {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 13px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .activity-item:last-child { border-bottom: none; }
+  .act-icon {
+    width: 34px; height: 34px;
+    border-radius: 9px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px; flex-shrink: 0; margin-top: 1px;
+  }
+  .act-content { flex: 1; min-width: 0; }
+  .act-text { font-size: 13px; line-height: 1.4; }
+  .act-text strong { color: var(--text); font-weight: 600; }
+  .act-time { font-size: 11px; color: var(--faint); margin-top: 3px; }
+
+  /* Top events table */
+  .mini-table { width: 100%; border-collapse: collapse; }
+  .mini-table th {
+    padding: 0 0 10px;
+    text-align: left;
+    font-family: var(--font-display);
+    font-size: 11px; font-weight: 700;
+    color: var(--muted); letter-spacing: 0.06em;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--border);
+  }
+  .mini-table td {
+    padding: 12px 0;
+    font-size: 13px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+  }
+  .mini-table tr:last-child td { border-bottom: none; }
+  .ev-rank {
+    width: 24px; height: 24px;
+    border-radius: 6px;
+    background: var(--surface-2);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-display); font-weight: 700; font-size: 11px;
+    color: var(--muted); flex-shrink: 0;
+  }
+  .ev-rank.gold { background: rgba(255,193,7,0.15); color: #ffc107; }
+  .ev-rank.silver { background: rgba(176,176,176,0.15); color: #b0b0b0; }
+  .ev-rank.bronze { background: rgba(205,127,50,0.15); color: #cd7f32; }
+  .ev-name-cell { display: flex; align-items: center; gap: 10px; }
+  .bar-mini-wrap { width: 80px; height: 5px; background: var(--surface-2); border-radius: 3px; overflow: hidden; }
+  .bar-mini { height: 100%; border-radius: 3px; background: var(--primary); }
+
+  @media (max-width: 1100px) {
+    .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+    .charts-row { grid-template-columns: 1fr; }
+    .bottom-row { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 600px) {
+    .kpi-grid { grid-template-columns: 1fr 1fr; }
+    .kpi-val { font-size: 24px; }
+    .donut-wrap { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="navbar" id="navbar"></nav>
+
+<div class="dash-page">
+  <div class="container">
+
+    <!-- Header -->
+    <div class="dash-header">
+      <div>
+        <div class="admin-tag"><span class="admin-dot"></span> Painel Admin</div>
+        <h1 class="dash-title">Dashboard <span class="greeting" id="greeting"></span></h1>
+        <p class="dash-sub">Visão geral da sua plataforma de eventos</p>
+      </div>
+      <div class="header-actions">
+        <a href="admin.html" class="btn btn-outline btn-sm">🎟 Eventos</a>
+        <a href="clientes.html" class="btn btn-outline btn-sm">👥 Clientes</a>
+      </div>
+    </div>
+
+    <!-- KPIs -->
+    <div class="kpi-grid">
+      <div class="kpi-card purple" style="animation:fadeUp 0.4s 0s ease both">
+        <div class="kpi-top">
+          <div class="kpi-icon" style="background:rgba(124,92,252,0.12)">🎟</div>
+          <span class="kpi-badge badge-up">↑ 12%</span>
+        </div>
+        <div class="kpi-val" id="kpiEvents">—</div>
+        <div class="kpi-label">Eventos publicados</div>
+      </div>
+      <div class="kpi-card green" style="animation:fadeUp 0.4s 0.05s ease both">
+        <div class="kpi-top">
+          <div class="kpi-icon" style="background:rgba(45,212,160,0.12)">👥</div>
+          <span class="kpi-badge badge-up">↑ 8%</span>
+        </div>
+        <div class="kpi-val" id="kpiUsers">—</div>
+        <div class="kpi-label">Clientes cadastrados</div>
+      </div>
+      <div class="kpi-card orange" style="animation:fadeUp 0.4s 0.1s ease both">
+        <div class="kpi-top">
+          <div class="kpi-icon" style="background:rgba(255,140,66,0.12)">💰</div>
+          <span class="kpi-badge badge-up">↑ 23%</span>
+        </div>
+        <div class="kpi-val" id="kpiRevenue">—</div>
+        <div class="kpi-label">Receita total</div>
+      </div>
+      <div class="kpi-card red" style="animation:fadeUp 0.4s 0.15s ease both">
+        <div class="kpi-top">
+          <div class="kpi-icon" style="background:rgba(255,92,92,0.12)">🎫</div>
+          <span class="kpi-badge badge-down">↓ 2%</span>
+        </div>
+        <div class="kpi-val" id="kpiTickets">—</div>
+        <div class="kpi-label">Ingressos vendidos</div>
+      </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="charts-row">
+
+      <!-- Bar chart: monthly revenue -->
+      <div class="chart-card" style="animation:fadeUp 0.4s 0.2s ease both">
+        <div class="chart-header">
+          <div>
+            <p class="chart-title">Receita por mês</p>
+            <p class="chart-sub">Comparativo de receita e ingressos em 2025</p>
+          </div>
+          <div class="chart-legend">
+            <div class="donut-item">
+              <div class="legend-dot" style="background:var(--primary)"></div>
+              <span class="legend-label">Receita</span>
+            </div>
+            <div class="donut-item">
+              <div class="legend-dot" style="background:var(--success);opacity:0.8"></div>
+              <span class="legend-label">Ingressos</span>
+            </div>
+          </div>
+        </div>
+        <div class="bar-chart" id="barChart"></div>
+      </div>
+
+      <!-- Donut: plan distribution -->
+      <div class="chart-card" style="animation:fadeUp 0.4s 0.25s ease both">
+        <div class="chart-header">
+          <div>
+            <p class="chart-title">Distribuição de planos</p>
+            <p class="chart-sub">Clientes por tipo de plano</p>
+          </div>
+        </div>
+        <div class="donut-wrap">
+          <svg class="donut-svg" width="130" height="130" viewBox="0 0 130 130" id="donutSvg"></svg>
+          <div class="donut-legend" id="donutLegend"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom row -->
+    <div class="bottom-row">
+
+      <!-- Activity feed -->
+      <div class="chart-card" style="animation:fadeUp 0.4s 0.3s ease both">
+        <div class="chart-header">
+          <div>
+            <p class="chart-title">Atividade recente</p>
+            <p class="chart-sub">Últimas ações na plataforma</p>
+          </div>
+        </div>
+        <div class="activity-list" id="activityList"></div>
+      </div>
+
+      <!-- Top events -->
+      <div class="chart-card" style="animation:fadeUp 0.4s 0.35s ease both">
+        <div class="chart-header">
+          <div>
+            <p class="chart-title">Eventos mais populares</p>
+            <p class="chart-sub">Por número de visualizações</p>
+          </div>
+        </div>
+        <table class="mini-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Evento</th>
+              <th>Views</th>
+            </tr>
+          </thead>
+          <tbody id="topEventsBody"></tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script src="shared.js"></script>
+<script>
+  const user = getUser();
+  if (!user || user.role !== 'ADMIN') {
+    showToast('Acesso restrito.', 'error');
+    setTimeout(() => window.location.href = 'login.html', 1200);
+  }
+
+  renderNavbar('admin-dashboard');
+
+  // Greeting
+  const hour = new Date().getHours();
+  const greet = hour < 12 ? 'Bom dia' : hour < 18 ? 'Boa tarde' : 'Boa noite';
+  document.getElementById('greeting').textContent = `— ${greet}, ${user?.name || 'Admin'} 👋`;
+
+  // ---- KPI data ----
+  const customers = getCustomers();
+  const totalRevenue = customers.reduce((s, c) => s + c.spent, 0);
+  const totalTickets = customers.reduce((s, c) => s + c.tickets, 0);
+
+  // Load events count from API (fallback to mock)
+  async function loadKPIs() {
+    let evCount = 0;
+    try {
+      const evs = await fetchEvents(0, 200);
+      evCount = evs.length;
+    } catch { evCount = 7; } // mock fallback
+
+    animateCount('kpiEvents', evCount, '', 600);
+    animateCount('kpiUsers', customers.length, '', 700);
+    animateCount('kpiRevenue', Math.round(totalRevenue), 'R$ ', 900, true);
+    animateCount('kpiTickets', totalTickets, '', 800);
+  }
+
+  function animateCount(id, target, prefix, duration, money = false) {
+    const el = document.getElementById(id);
+    const start = performance.now();
+    function tick(now) {
+      const p = Math.min((now - start) / duration, 1);
+      const ease = 1 - Math.pow(1 - p, 3);
+      const val = Math.round(target * ease);
+      el.textContent = prefix + (money ? val.toLocaleString('pt-BR') : val);
+      if (p < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }
+
+  // ---- Bar chart ----
+  const monthlyData = [
+    { month: 'Ago', revenue: 1200, tickets: 28 },
+    { month: 'Set', revenue: 1850, tickets: 41 },
+    { month: 'Out', revenue: 2100, tickets: 48 },
+    { month: 'Nov', revenue: 1600, tickets: 35 },
+    { month: 'Dez', revenue: 3200, tickets: 72 },
+    { month: 'Jan', revenue: 2800, tickets: 63 },
+    { month: 'Fev', revenue: 3800, tickets: 85 },
+  ];
+
+  function renderBarChart() {
+    const maxRev = Math.max(...monthlyData.map(d => d.revenue));
+    const maxTix = Math.max(...monthlyData.map(d => d.tickets));
+    const MAX_H = 120;
+
+    document.getElementById('barChart').innerHTML = monthlyData.map((d, i) => {
+      const revH = Math.round((d.revenue / maxRev) * MAX_H);
+      const tixH = Math.round((d.tickets / maxTix) * MAX_H);
+      return `
+        <div class="bar-col">
+          <div class="bar-wrap">
+            <div class="bar bar-primary" style="height:0;transition:height 0.6s ${i*0.07}s ease"
+              data-h="${revH}" title="Receita: R$ ${d.revenue.toLocaleString('pt-BR')}"></div>
+            <div class="bar bar-success" style="height:0;transition:height 0.6s ${i*0.07+0.05}s ease"
+              data-h="${tixH}" title="Ingressos: ${d.tickets}"></div>
+          </div>
+          <div class="bar-label">${d.month}</div>
+        </div>`;
+    }).join('');
+
+    // Animate bars
+    requestAnimationFrame(() => {
+      document.querySelectorAll('.bar[data-h]').forEach(b => {
+        b.style.height = b.dataset.h + 'px';
+      });
+    });
+  }
+
+  // ---- Donut chart ----
+  function renderDonut() {
+    const plans = [
+      { label: 'Gratuito', count: customers.filter(c => c.plan === 'Gratuito').length, color: '#44445a' },
+      { label: 'Premium', count: customers.filter(c => c.plan === 'Premium').length, color: '#7c5cfc' },
+      { label: 'Business', count: customers.filter(c => c.plan === 'Business').length, color: '#ff8c42' },
+    ];
+    const total = plans.reduce((s, p) => s + p.count, 0);
+
+    const CX = 65, CY = 65, R = 48, THICKNESS = 18;
+    const innerR = R - THICKNESS;
+    let startAngle = -Math.PI / 2;
+    let paths = '';
+
+    plans.forEach(p => {
+      if (p.count === 0) return;
+      const angle = (p.count / total) * 2 * Math.PI;
+      const endAngle = startAngle + angle;
+      const x1 = CX + R * Math.cos(startAngle), y1 = CY + R * Math.sin(startAngle);
+      const x2 = CX + R * Math.cos(endAngle), y2 = CY + R * Math.sin(endAngle);
+      const ix1 = CX + innerR * Math.cos(startAngle), iy1 = CY + innerR * Math.sin(startAngle);
+      const ix2 = CX + innerR * Math.cos(endAngle), iy2 = CY + innerR * Math.sin(endAngle);
+      const large = angle > Math.PI ? 1 : 0;
+      paths += `<path d="M${x1},${y1} A${R},${R} 0 ${large},1 ${x2},${y2} L${ix2},${iy2} A${innerR},${innerR} 0 ${large},0 ${ix1},${iy1} Z"
+        fill="${p.color}" opacity="0.9" style="cursor:default">
+        <title>${p.label}: ${p.count}</title></path>`;
+      startAngle = endAngle;
+    });
+
+    document.getElementById('donutSvg').innerHTML = `
+      ${paths}
+      <text x="${CX}" y="${CY}" text-anchor="middle" dominant-baseline="middle"
+        style="font-family:var(--font-display);font-size:18px;font-weight:800;fill:#eeeef5">${total}</text>
+      <text x="${CX}" y="${CY + 16}" text-anchor="middle" dominant-baseline="middle"
+        style="font-family:var(--font-body);font-size:9px;fill:#8080a0">clientes</text>`;
+
+    document.getElementById('donutLegend').innerHTML = plans.map(p => `
+      <div class="donut-item">
+        <div class="donut-color" style="background:${p.color}"></div>
+        <span class="donut-item-label">${p.label}</span>
+        <span class="donut-item-val">${p.count}</span>
+      </div>`).join('');
+  }
+
+  // ---- Activity feed ----
+  const ACTIVITIES = [
+    { icon: '🆕', bg: 'rgba(124,92,252,0.12)', text: '<strong>Ana Silva</strong> se cadastrou na plataforma', time: 'Há 5 minutos' },
+    { icon: '🎟', bg: 'rgba(45,212,160,0.12)', text: '<strong>Diego Fernandes</strong> comprou 2 ingressos para <strong>Tech Summit 2025</strong>', time: 'Há 18 minutos' },
+    { icon: '💬', bg: 'rgba(255,140,66,0.12)', text: '<strong>Helena Martins</strong> aplicou cupom <strong>SAVE20</strong>', time: 'Há 34 minutos' },
+    { icon: '⭐', bg: 'rgba(255,193,7,0.12)', text: '<strong>Lucas Oliveira</strong> fez upgrade para o plano <strong>Business</strong>', time: 'Há 1 hora' },
+    { icon: '🎉', bg: 'rgba(124,92,252,0.12)', text: 'Novo evento <strong>DevConf BR</strong> foi publicado', time: 'Há 2 horas' },
+    { icon: '💰', bg: 'rgba(45,212,160,0.12)', text: '<strong>Beatriz Costa</strong> concluiu compra de R$ 150,00', time: 'Há 3 horas' },
+  ];
+
+  function renderActivity() {
+    document.getElementById('activityList').innerHTML = ACTIVITIES.map(a => `
+      <div class="activity-item">
+        <div class="act-icon" style="background:${a.bg}">${a.icon}</div>
+        <div class="act-content">
+          <p class="act-text">${a.text}</p>
+          <p class="act-time">${a.time}</p>
+        </div>
+      </div>`).join('');
+  }
+
+  // ---- Top events ----
+  const TOP_EVENTS = [
+    { name: 'Tech Summit 2025', views: 4821, pct: 100 },
+    { name: 'DevConf BR', views: 3540, pct: 73 },
+    { name: 'UX & Design Week', views: 2980, pct: 62 },
+    { name: 'Hackathon Nordeste', views: 2210, pct: 46 },
+    { name: 'Startup Weekend SP', views: 1890, pct: 39 },
+  ];
+
+  function renderTopEvents() {
+    const ranks = ['gold', 'silver', 'bronze', '', ''];
+    document.getElementById('topEventsBody').innerHTML = TOP_EVENTS.map((ev, i) => `
+      <tr>
+        <td><div class="ev-rank ${ranks[i]}">${i + 1}</div></td>
+        <td>
+          <div class="ev-name-cell">
+            <div>
+              <div style="font-weight:600;font-size:13px">${ev.name}</div>
+              <div class="bar-mini-wrap" style="margin-top:5px">
+                <div class="bar-mini" style="width:0;transition:width 0.8s ${i*0.1}s ease" data-w="${ev.pct}%"></div>
+              </div>
+            </div>
+          </div>
+        </td>
+        <td style="color:var(--muted);font-size:13px;white-space:nowrap">${ev.views.toLocaleString('pt-BR')}</td>
+      </tr>`).join('');
+
+    requestAnimationFrame(() => {
+      document.querySelectorAll('.bar-mini[data-w]').forEach(b => { b.style.width = b.dataset.w; });
+    });
+  }
+
+  // Init
+  loadKPIs();
+  renderBarChart();
+  renderDonut();
+  renderActivity();
+  renderTopEvents();
+</script>
+</body>
+</html>

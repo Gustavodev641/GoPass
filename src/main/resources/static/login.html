@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GoPass — Login</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared.css">
+<style>
+  .login-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    padding: 24px;
+  }
+  .login-bg {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+  .bg-orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(90px);
+    opacity: 0.2;
+  }
+  .bg-orb-1 {
+    width: 550px; height: 550px;
+    background: var(--primary);
+    top: -180px; left: -120px;
+    animation: orbFloat 8s ease-in-out infinite;
+  }
+  .bg-orb-2 {
+    width: 420px; height: 420px;
+    background: #ff5c5c;
+    bottom: -120px; right: -80px;
+    animation: orbFloat 10s ease-in-out infinite reverse;
+  }
+  .bg-orb-3 {
+    width: 300px; height: 300px;
+    background: #2dd4a0;
+    top: 50%; right: 15%;
+    animation: orbFloat 12s ease-in-out infinite;
+    opacity: 0.08;
+  }
+  @keyframes orbFloat {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33% { transform: translate(20px, -30px) scale(1.05); }
+    66% { transform: translate(-15px, 20px) scale(0.95); }
+  }
+  .bg-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+    background-size: 48px 48px;
+  }
+  .login-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 28px;
+    padding: 44px;
+    width: 100%;
+    max-width: 430px;
+    position: relative;
+    z-index: 1;
+    box-shadow: 0 8px 48px rgba(0,0,0,0.6), 0 0 60px rgba(124,92,252,0.1);
+    animation: cardIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+  @keyframes cardIn {
+    from { opacity: 0; transform: translateY(24px) scale(0.97); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    justify-content: center;
+    margin-bottom: 32px;
+  }
+  .brand-icon {
+    width: 42px; height: 42px;
+    background: var(--primary);
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+    box-shadow: 0 0 24px rgba(124,92,252,0.5);
+  }
+  .brand-name {
+    font-family: var(--font-display);
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+  }
+  .tab-bar {
+    display: flex;
+    background: var(--bg);
+    border-radius: 10px;
+    padding: 4px;
+    margin-bottom: 28px;
+  }
+  .tab-btn {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--muted);
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .tab-btn.active {
+    background: var(--surface);
+    color: var(--text);
+    box-shadow: 0 1px 6px rgba(0,0,0,0.4);
+  }
+  .auth-form { display: none; flex-direction: column; gap: 18px; }
+  .auth-form.visible { display: flex; animation: fadeUp 0.3s ease; }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .form-subtitle {
+    font-size: 14px;
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
+  .pw-wrap { position: relative; }
+  .pw-toggle {
+    position: absolute;
+    right: 14px; top: 50%;
+    transform: translateY(-50%);
+    background: none; border: none;
+    cursor: pointer; font-size: 16px;
+    padding: 4px; line-height: 1;
+    color: var(--faint);
+    transition: color 0.2s;
+  }
+  .pw-toggle:hover { color: var(--muted); }
+  .pw-wrap .form-control { padding-right: 44px; }
+  .form-error-msg {
+    font-size: 13px;
+    color: #ff5c5c;
+    padding: 10px 14px;
+    background: rgba(255,92,92,0.08);
+    border: 1px solid rgba(255,92,92,0.2);
+    border-radius: 8px;
+    display: none;
+  }
+  .form-error-msg.visible { display: block; animation: fadeUp 0.2s ease; }
+  .btn-submit {
+    width: 100%;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .btn-submit::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+    transform: translateX(-100%);
+    transition: transform 0.6s;
+  }
+  .btn-submit:hover::after { transform: translateX(100%); }
+  .demo-hint {
+    font-size: 12px;
+    color: var(--faint);
+    text-align: center;
+    padding: 10px 14px;
+    background: var(--bg);
+    border-radius: 8px;
+    line-height: 1.5;
+  }
+  .demo-hint strong { color: var(--muted); }
+  .skip-link {
+    display: block;
+    text-align: center;
+    margin-top: 22px;
+    font-size: 13px;
+    color: var(--muted);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .skip-link:hover { color: var(--primary-light); }
+  .btn-loading .spinner-inline { display: inline-block; }
+  .spinner-inline {
+    display: none;
+    width: 14px; height: 14px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+    margin-right: 6px;
+  }
+</style>
+</head>
+<body>
+<div class="login-page">
+  <div class="login-bg">
+    <div class="bg-orb bg-orb-1"></div>
+    <div class="bg-orb bg-orb-2"></div>
+    <div class="bg-orb bg-orb-3"></div>
+    <div class="bg-grid"></div>
+  </div>
+
+  <div class="login-card">
+    <div class="brand">
+      <div class="brand-icon">◈</div>
+      <span class="brand-name">GoPass</span>
+    </div>
+
+    <div class="tab-bar">
+      <button class="tab-btn active" onclick="switchTab('login')">Entrar</button>
+      <button class="tab-btn" onclick="switchTab('register')">Criar conta</button>
+    </div>
+
+    <!-- LOGIN FORM -->
+    <form class="auth-form visible" id="loginForm" onsubmit="handleLogin(event)">
+      <p class="form-subtitle">Bem-vindo de volta 👋</p>
+
+      <div class="form-group">
+        <label class="form-label">Email</label>
+        <input type="email" class="form-control" id="loginEmail" placeholder="seu@email.com" required />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Senha</label>
+        <div class="pw-wrap">
+          <input type="password" class="form-control" id="loginPassword" placeholder="••••••••" required />
+          <button type="button" class="pw-toggle" onclick="togglePw('loginPassword', this)">👁</button>
+        </div>
+      </div>
+
+      <div class="form-error-msg" id="loginError"></div>
+
+      <button type="submit" class="btn btn-primary btn-submit" id="loginBtn">
+        <span class="spinner-inline"></span> Entrar
+      </button>
+
+      <div class="demo-hint">
+        <strong>Demo admin:</strong> admin@gopass.com / admin123<br>
+        <strong>Demo usuário:</strong> qualquer email + senha ≥ 6 chars
+      </div>
+    </form>
+
+    <!-- REGISTER FORM -->
+    <form class="auth-form" id="registerForm" onsubmit="handleRegister(event)">
+      <p class="form-subtitle">Crie sua conta grátis ✨</p>
+
+      <div class="form-group">
+        <label class="form-label">Nome</label>
+        <input type="text" class="form-control" id="regName" placeholder="Seu nome" required />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Email</label>
+        <input type="email" class="form-control" id="regEmail" placeholder="seu@email.com" required />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Senha</label>
+        <div class="pw-wrap">
+          <input type="password" class="form-control" id="regPassword" placeholder="Mínimo 6 caracteres" required />
+          <button type="button" class="pw-toggle" onclick="togglePw('regPassword', this)">👁</button>
+        </div>
+      </div>
+
+      <div class="form-error-msg" id="registerError"></div>
+
+      <button type="submit" class="btn btn-primary btn-submit" id="registerBtn">
+        <span class="spinner-inline"></span> Criar conta
+      </button>
+    </form>
+
+    <a href="dashboard.html" class="skip-link">Explorar eventos sem conta →</a>
+  </div>
+</div>
+
+<script src="shared.js"></script>
+<script>
+  // Redirect if already logged in
+  if (getUser()) window.location.href = getUser().role === 'ADMIN' ? 'admin.html' : 'dashboard.html';
+
+  function switchTab(tab) {
+    document.querySelectorAll('.tab-btn').forEach((b, i) => b.classList.toggle('active', (i === 0 && tab === 'login') || (i === 1 && tab === 'register')));
+    document.getElementById('loginForm').classList.toggle('visible', tab === 'login');
+    document.getElementById('registerForm').classList.toggle('visible', tab === 'register');
+  }
+
+  function togglePw(id, btn) {
+    const el = document.getElementById(id);
+    el.type = el.type === 'password' ? 'text' : 'password';
+    btn.textContent = el.type === 'password' ? '👁' : '👁‍🗨';
+  }
+
+  function setLoading(btnId, loading) {
+    const btn = document.getElementById(btnId);
+    btn.disabled = loading;
+    btn.classList.toggle('btn-loading', loading);
+    btn.querySelector('.spinner-inline').style.display = loading ? 'inline-block' : 'none';
+  }
+
+  function showError(id, msg) {
+    const el = document.getElementById(id);
+    el.textContent = msg;
+    el.classList.add('visible');
+  }
+
+  function clearError(id) {
+    const el = document.getElementById(id);
+    el.textContent = '';
+    el.classList.remove('visible');
+  }
+
+  function handleLogin(e) {
+    e.preventDefault();
+    clearError('loginError');
+    const email = document.getElementById('loginEmail').value;
+    const pw = document.getElementById('loginPassword').value;
+    setLoading('loginBtn', true);
+    setTimeout(() => {
+      if (email && pw.length >= 6) {
+        const user = { email, name: email.split('@')[0], role: email === 'admin@gopass.com' ? 'ADMIN' : 'USER' };
+        saveUser(user);
+        showToast('Bem-vindo de volta!');
+        setTimeout(() => window.location.href = user.role === 'ADMIN' ? 'admin.html' : 'dashboard.html', 800);
+      } else {
+        setLoading('loginBtn', false);
+        showError('loginError', 'Email ou senha inválidos. A senha precisa ter ao menos 6 caracteres.');
+      }
+    }, 700);
+  }
+
+  function handleRegister(e) {
+    e.preventDefault();
+    clearError('registerError');
+    const name = document.getElementById('regName').value;
+    const email = document.getElementById('regEmail').value;
+    const pw = document.getElementById('regPassword').value;
+    if (pw.length < 6) { showError('registerError', 'A senha precisa ter pelo menos 6 caracteres.'); return; }
+    setLoading('registerBtn', true);
+    setTimeout(() => {
+      const user = { email, name, role: 'USER' };
+      saveUser(user);
+      showToast('Conta criada com sucesso!');
+      setTimeout(() => window.location.href = 'dashboard.html', 800);
+    }, 700);
+  }
+</script>
+</body>
+</html>

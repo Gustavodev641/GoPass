@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GoPass — Evento</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared.css">
+<style>
+
+  /* ─── HERO IMAGE ─────────────────────────────── */
+  .event-hero {
+    position: relative;
+    width: 100%;
+    height: 480px;
+    overflow: hidden;
+    background: var(--surface-2);
+  }
+  .hero-img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    display: block;
+    animation: heroScale 0.8s cubic-bezier(0.16,1,0.3,1) forwards;
+  }
+  @keyframes heroScale {
+    from { transform: scale(1.06); opacity: 0; }
+    to   { transform: scale(1);    opacity: 1; }
+  }
+  .hero-placeholder {
+    width: 100%; height: 100%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-display);
+    font-size: 120px; font-weight: 800;
+    color: var(--primary);
+    background: linear-gradient(135deg, var(--surface-2) 0%, var(--bg) 100%);
+    user-select: none;
+  }
+  /* dark gradient over the image bottom */
+  .hero-gradient {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 220px;
+    background: linear-gradient(to top, var(--bg) 0%, transparent 100%);
+    pointer-events: none;
+  }
+  /* back button floating */
+  .back-btn {
+    position: absolute;
+    top: 20px; left: 24px;
+    display: flex; align-items: center; gap: 7px;
+    padding: 9px 16px;
+    background: rgba(8,8,14,0.7);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 100px;
+    color: var(--text);
+    font-size: 13px; font-weight: 600;
+    font-family: var(--font-display);
+    cursor: pointer;
+    text-decoration: none;
+    transition: all var(--t);
+    z-index: 10;
+  }
+  .back-btn:hover { background: rgba(8,8,14,0.9); border-color: var(--border-h); }
+
+  /* ─── LAYOUT ─────────────────────────────────── */
+  .event-page { padding: 0 0 80px; }
+
+  .event-layout {
+    display: grid;
+    grid-template-columns: 1fr 360px;
+    gap: 32px;
+    align-items: start;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 28px;
+    margin-top: -60px;
+    position: relative;
+    z-index: 2;
+  }
+
+  /* ─── MAIN CONTENT ───────────────────────────── */
+  .event-main { display: flex; flex-direction: column; gap: 24px; }
+
+  .event-top-badges {
+    display: flex; align-items: center; gap: 8px;
+    flex-wrap: wrap;
+    animation: fadeUp 0.4s ease both;
+  }
+
+  .event-title-block {
+    animation: fadeUp 0.4s 0.05s ease both;
+  }
+  .event-title {
+    font-family: var(--font-display);
+    font-size: clamp(28px, 4vw, 48px);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+    margin-bottom: 12px;
+  }
+  .event-tagline {
+    font-size: 16px;
+    color: var(--muted);
+    line-height: 1.6;
+    max-width: 640px;
+  }
+
+  /* Info strips */
+  .info-strip {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    animation: fadeUp 0.4s 0.1s ease both;
+  }
+  .info-chip {
+    display: flex; align-items: center; gap: 9px;
+    padding: 10px 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-sm);
+    font-size: 13px;
+  }
+  .info-chip-icon { font-size: 16px; flex-shrink: 0; }
+  .info-chip-label { font-size: 11px; color: var(--muted); margin-bottom: 1px; font-family: var(--font-display); letter-spacing: 0.04em; text-transform: uppercase; }
+  .info-chip-val { font-weight: 600; font-size: 13px; }
+
+  /* Description */
+  .section-block {
+    animation: fadeUp 0.4s 0.15s ease both;
+  }
+  .section-block-title {
+    font-family: var(--font-display);
+    font-size: 18px; font-weight: 700;
+    margin-bottom: 14px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .event-description {
+    font-size: 15px;
+    color: var(--muted);
+    line-height: 1.75;
+    white-space: pre-wrap;
+  }
+
+  /* Highlights */
+  .highlights-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+  .highlight-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+    padding: 16px;
+    text-align: center;
+    transition: border-color var(--t), transform var(--t);
+  }
+  .highlight-item:hover { border-color: var(--primary); transform: translateY(-2px); }
+  .highlight-icon { font-size: 28px; margin-bottom: 8px; display: block; }
+  .highlight-label { font-size: 12px; color: var(--muted); font-family: var(--font-display); letter-spacing: 0.04em; text-transform: uppercase; }
+  .highlight-val { font-family: var(--font-display); font-size: 18px; font-weight: 800; margin-top: 2px; }
+
+  /* Coupons */
+  .coupon-list { display: flex; flex-direction: column; gap: 8px; }
+  .coupon-item {
+    display: flex; align-items: center; gap: 14px;
+    padding: 12px 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-sm);
+    transition: border-color var(--t);
+  }
+  .coupon-item:hover { border-color: var(--primary); }
+  .coupon-code {
+    font-family: var(--font-display);
+    font-size: 14px; font-weight: 800;
+    color: var(--primary-light);
+    letter-spacing: 0.08em;
+    background: rgba(124,92,252,0.1);
+    padding: 4px 10px; border-radius: 6px;
+    cursor: pointer; transition: background var(--t);
+    white-space: nowrap;
+  }
+  .coupon-code:hover { background: rgba(124,92,252,0.2); }
+  .coupon-info { flex: 1; }
+  .coupon-discount { font-weight: 700; font-size: 14px; color: var(--success); }
+  .coupon-valid { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .copy-hint { font-size: 11px; color: var(--faint); }
+
+  /* Related events */
+  .related-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 14px;
+  }
+  .related-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+    overflow: hidden;
+    cursor: pointer;
+    transition: all var(--t);
+    text-decoration: none;
+    display: block;
+  }
+  .related-card:hover { border-color: var(--border-h); transform: translateY(-3px); }
+  .related-img {
+    width: 100%; aspect-ratio: 16/9;
+    object-fit: cover; display: block;
+    background: var(--surface-2);
+  }
+  .related-placeholder {
+    width: 100%; aspect-ratio: 16/9;
+    background: linear-gradient(135deg, var(--surface-2), var(--bg));
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-display); font-weight: 800; font-size: 28px;
+    color: var(--primary);
+  }
+  .related-body { padding: 12px 14px; }
+  .related-title {
+    font-family: var(--font-display);
+    font-size: 13px; font-weight: 700;
+    line-height: 1.3; margin-bottom: 4px;
+  }
+  .related-date { font-size: 11px; color: var(--muted); }
+
+  /* ─── SIDEBAR ────────────────────────────────── */
+  .event-sidebar { display: flex; flex-direction: column; gap: 16px; }
+
+  .sidebar-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-lg);
+    overflow: hidden;
+    animation: fadeUp 0.4s 0.2s ease both;
+  }
+  .sidebar-card + .sidebar-card { animation-delay: 0.28s; }
+
+  /* Purchase card */
+  .purchase-card { border-color: var(--primary); box-shadow: 0 0 40px rgba(124,92,252,0.12); }
+  .purchase-header {
+    padding: 20px 22px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .price-row { display: flex; align-items: baseline; gap: 6px; margin-bottom: 4px; }
+  .price-label { font-size: 12px; color: var(--muted); font-family: var(--font-display); letter-spacing: 0.05em; text-transform: uppercase; }
+  .price-val {
+    font-family: var(--font-display);
+    font-size: 34px; font-weight: 800;
+    letter-spacing: -0.03em;
+  }
+  .price-free { color: var(--success); }
+  .price-paid { color: var(--text); }
+  .price-sub { font-size: 12px; color: var(--muted); }
+
+  .purchase-body { padding: 18px 22px; display: flex; flex-direction: column; gap: 14px; }
+
+  .coupon-input-wrap {
+    display: flex; gap: 8px;
+  }
+  .coupon-input-wrap .form-control {
+    font-size: 13px; padding: 10px 12px;
+    text-transform: uppercase; letter-spacing: 0.05em;
+  }
+  .btn-apply {
+    padding: 10px 14px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--r-sm);
+    color: var(--muted); font-size: 13px;
+    cursor: pointer; white-space: nowrap;
+    transition: all var(--t); font-family: var(--font-body);
+  }
+  .btn-apply:hover { border-color: var(--primary); color: var(--primary); }
+  .coupon-feedback { font-size: 12px; }
+  .coupon-feedback.success { color: var(--success); }
+  .coupon-feedback.error { color: var(--accent); }
+
+  .btn-register {
+    width: 100%; justify-content: center;
+    font-size: 15px; padding: 14px;
+    border-radius: var(--r-sm);
+    box-shadow: 0 0 28px rgba(124,92,252,0.3);
+    transition: all var(--t);
+    position: relative; overflow: hidden;
+  }
+  .btn-register::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+    transform: translateX(-100%);
+    transition: transform 0.6s;
+  }
+  .btn-register:hover::after { transform: translateX(100%); }
+
+  .guarantee-row {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 12px; color: var(--muted); justify-content: center;
+  }
+
+  /* Organizer card */
+  .org-card-body { padding: 20px 22px; display: flex; flex-direction: column; gap: 14px; }
+  .org-row { display: flex; align-items: center; gap: 12px; }
+  .org-avatar {
+    width: 44px; height: 44px;
+    border-radius: 12px;
+    background: var(--primary);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-display); font-weight: 800;
+    font-size: 18px; color: #fff;
+    flex-shrink: 0;
+  }
+  .org-name { font-family: var(--font-display); font-size: 15px; font-weight: 700; }
+  .org-label { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+  /* Share card */
+  .share-body { padding: 18px 22px; display: flex; flex-direction: column; gap: 10px; }
+  .share-title { font-family: var(--font-display); font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+  .share-btns { display: flex; gap: 8px; }
+  .share-btn {
+    flex: 1; padding: 9px 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--r-sm);
+    background: transparent;
+    color: var(--muted); font-size: 13px;
+    cursor: pointer; transition: all var(--t);
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    font-family: var(--font-body);
+  }
+  .share-btn:hover { border-color: var(--border-h); color: var(--text); background: var(--surface-2); }
+
+  /* ─── LOADING / ERROR STATE ─── */
+  .loading-state {
+    display: flex; align-items: center; justify-content: center;
+    min-height: 60vh; gap: 14px;
+    font-size: 15px; color: var(--muted);
+  }
+  .spinner-lg {
+    width: 28px; height: 28px;
+    border: 3px solid var(--border);
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    flex-shrink: 0;
+  }
+
+  /* ─── RESPONSIVE ─── */
+  @media (max-width: 900px) {
+    .event-hero { height: 320px; }
+    .event-layout {
+      grid-template-columns: 1fr;
+      margin-top: -40px;
+      padding: 0 16px;
+    }
+    .event-sidebar { order: -1; }
+    .purchase-card { max-width: 100%; }
+    .highlights-grid { grid-template-columns: repeat(3, 1fr); }
+  }
+  @media (max-width: 580px) {
+    .event-hero { height: 240px; }
+    .highlights-grid { grid-template-columns: 1fr 1fr; }
+    .info-strip { flex-direction: column; }
+    .info-chip { width: 100%; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="navbar" id="navbar"></nav>
+
+<div class="event-page">
+
+  <!-- Hero -->
+  <div class="event-hero" id="eventHero">
+    <div class="loading-state"><div class="spinner-lg"></div> Carregando evento...</div>
+  </div>
+
+  <!-- Content -->
+  <div class="event-layout" id="eventLayout" style="display:none">
+
+    <!-- ── MAIN ── -->
+    <div class="event-main" id="eventMain"></div>
+
+    <!-- ── SIDEBAR ── -->
+    <div class="event-sidebar" id="eventSidebar"></div>
+
+  </div>
+</div>
+
+<script src="shared.js"></script>
+<script>
+  renderNavbar('dashboard');
+
+  // ── Parse event from URL ──────────────────────
+  const params = new URLSearchParams(window.location.search);
+  const eventId = params.get('id');
+
+  // Mock coupons per event (in a real app, fetch from /api/coupon/event/:id)
+  const MOCK_COUPONS = {
+    default: [
+      { code: 'GOPASS10', discount: 10, valid: '2025-12-31' },
+      { code: 'PROMO20', discount: 20, valid: '2025-06-30' },
+    ]
+  };
+
+  async function loadEvent() {
+    try {
+      const events = await fetchEvents(0, 200);
+
+      let event;
+      if (eventId) {
+        event = events.find(e => e.id === eventId);
+      }
+      // fallback: first event for demo
+      if (!event && events.length > 0) event = events[0];
+
+      if (!event) { renderNotFound(); return; }
+
+      // Update page title
+      document.title = `GoPass — ${event.title}`;
+
+      renderHero(event);
+      renderMain(event, events);
+      renderSidebar(event);
+
+      document.getElementById('eventLayout').style.display = 'grid';
+    } catch (err) {
+      renderLoadError();
+    }
+  }
+
+  // ── HERO ─────────────────────────────────────
+  function renderHero(ev) {
+    const hero = document.getElementById('eventHero');
+    const imgContent = ev.imgUrl
+      ? `<img src="${ev.imgUrl}" class="hero-img" alt="${escHtml(ev.title)}"
+            onerror="this.outerHTML='<div class=\\'hero-placeholder\\'>${escHtml(ev.title[0])}</div>'" />`
+      : `<div class="hero-placeholder">${escHtml(ev.title[0])}</div>`;
+
+    hero.innerHTML = `
+      ${imgContent}
+      <div class="hero-gradient"></div>
+      <a href="dashboard.html" class="back-btn">← Voltar</a>`;
+  }
+
+  // ── MAIN CONTENT ─────────────────────────────
+  function renderMain(ev, allEvents) {
+    const badgeClass = ev.remote ? 'badge-remote' : 'badge-presencial';
+    const badgeText  = ev.remote ? '🌐 Remoto' : '📍 Presencial';
+    const dateObj    = new Date(ev.date);
+    const dateFormatted = dateObj.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' });
+    const timeFormatted = dateObj.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    const locationText  = ev.remote ? 'Online / Remoto' : [ev.city, ev.state].filter(Boolean).join(', ') || 'A confirmar';
+
+    // Related: other events, excluding this one
+    const related = allEvents.filter(e => e.id !== ev.id).slice(0, 4);
+
+    const coupons = MOCK_COUPONS[ev.id] || MOCK_COUPONS.default;
+
+    document.getElementById('eventMain').innerHTML = `
+
+      <!-- Badges -->
+      <div class="event-top-badges">
+        <span class="badge ${badgeClass}">${badgeText}</span>
+        ${isUpcoming(ev.date) ? '<span class="badge" style="background:rgba(45,212,160,0.1);color:var(--success);border:1px solid rgba(45,212,160,0.22)">🟢 Em breve</span>' : '<span class="badge" style="background:rgba(255,92,92,0.1);color:var(--accent);border:1px solid rgba(255,92,92,0.22)">Encerrado</span>'}
+      </div>
+
+      <!-- Title -->
+      <div class="event-title-block">
+        <h1 class="event-title">${escHtml(ev.title)}</h1>
+        ${ev.description ? `<p class="event-tagline">${escHtml(ev.description)}</p>` : ''}
+      </div>
+
+      <!-- Info chips -->
+      <div class="info-strip">
+        <div class="info-chip">
+          <span class="info-chip-icon">📅</span>
+          <div>
+            <div class="info-chip-label">Data</div>
+            <div class="info-chip-val">${dateFormatted}</div>
+          </div>
+        </div>
+        <div class="info-chip">
+          <span class="info-chip-icon">🕐</span>
+          <div>
+            <div class="info-chip-label">Horário</div>
+            <div class="info-chip-val">${timeFormatted}</div>
+          </div>
+        </div>
+        <div class="info-chip">
+          <span class="info-chip-icon">${ev.remote ? '🌐' : '📍'}</span>
+          <div>
+            <div class="info-chip-label">Local</div>
+            <div class="info-chip-val">${escHtml(locationText)}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Highlights -->
+      <div class="section-block">
+        <h2 class="section-block-title">🔥 Destaques</h2>
+        <div class="highlights-grid">
+          <div class="highlight-item">
+            <span class="highlight-icon">🎯</span>
+            <div class="highlight-label">Formato</div>
+            <div class="highlight-val">${ev.remote ? 'Online' : 'Presencial'}</div>
+          </div>
+          <div class="highlight-item">
+            <span class="highlight-icon">🎟</span>
+            <div class="highlight-label">Ingressos</div>
+            <div class="highlight-val">Disponíveis</div>
+          </div>
+          <div class="highlight-item">
+            <span class="highlight-icon">⭐</span>
+            <div class="highlight-label">Avaliação</div>
+            <div class="highlight-val">4.9 / 5</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Description full -->
+      ${ev.description ? `
+      <div class="section-block">
+        <h2 class="section-block-title">📋 Sobre o evento</h2>
+        <p class="event-description">${escHtml(ev.description)}\n\nEste é um evento imperdível para todos os interessados no tema. Venha participar, aprender com os melhores profissionais e fazer networking com pessoas incríveis.\n\nNão perca a oportunidade de estar presente nesse momento único!</p>
+      </div>` : ''}
+
+      <!-- Coupons -->
+      <div class="section-block">
+        <h2 class="section-block-title">🏷 Cupons disponíveis</h2>
+        <div class="coupon-list">
+          ${coupons.map(c => `
+            <div class="coupon-item">
+              <span class="coupon-code" onclick="copyCoupon('${c.code}', this)" title="Clique para copiar">${c.code}</span>
+              <div class="coupon-info">
+                <div class="coupon-discount">${c.discount}% de desconto</div>
+                <div class="coupon-valid">Válido até ${formatDate(c.valid)}</div>
+              </div>
+              <span class="copy-hint">clique para copiar</span>
+            </div>`).join('')}
+        </div>
+      </div>
+
+      <!-- Related events -->
+      ${related.length > 0 ? `
+      <div class="section-block">
+        <h2 class="section-block-title">🎪 Outros eventos</h2>
+        <div class="related-grid">
+          ${related.map(r => `
+            <a href="evento.html?id=${r.id}" class="related-card">
+              ${r.imgUrl
+                ? `<img src="${r.imgUrl}" class="related-img" alt="${escHtml(r.title)}" onerror="this.outerHTML='<div class=\\'related-placeholder\\'>${escHtml(r.title[0])}</div>'" />`
+                : `<div class="related-placeholder">${escHtml(r.title[0])}</div>`}
+              <div class="related-body">
+                <div class="related-title">${escHtml(r.title)}</div>
+                <div class="related-date">${formatDate(r.date)}</div>
+              </div>
+            </a>`).join('')}
+        </div>
+      </div>` : ''}
+    `;
+  }
+
+  // ── SIDEBAR ───────────────────────────────────
+  function renderSidebar(ev) {
+    const orgName = 'GoPass Eventos';
+
+    document.getElementById('eventSidebar').innerHTML = `
+
+      <!-- Purchase card -->
+      <div class="sidebar-card purchase-card">
+        <div class="purchase-header">
+          <div class="price-label">Ingresso</div>
+          <div class="price-row">
+            <div class="price-val price-free">Gratuito</div>
+          </div>
+          <div class="price-sub">Inscrição via link oficial do evento</div>
+        </div>
+        <div class="purchase-body">
+          <div>
+            <div class="form-label" style="margin-bottom:6px">Tem um cupom?</div>
+            <div class="coupon-input-wrap">
+              <input type="text" class="form-control" id="couponInput" placeholder="Ex: GOPASS10" />
+              <button class="btn-apply" onclick="applyCoupon()">Aplicar</button>
+            </div>
+            <p class="coupon-feedback" id="couponFeedback" style="margin-top:6px;display:none"></p>
+          </div>
+          <a href="${ev.eventUrl || '#'}" target="_blank" class="btn btn-primary btn-register">
+            🎟 Inscrever-se agora
+          </a>
+          <div class="guarantee-row">
+            🔒 Redirecionamento seguro para o site oficial
+          </div>
+        </div>
+      </div>
+
+      <!-- Organizer -->
+      <div class="sidebar-card">
+        <div class="org-card-body">
+          <div class="section-block-title" style="margin-bottom:8px;border:none;padding:0">🎤 Organizador</div>
+          <div class="org-row">
+            <div class="org-avatar">${orgName[0]}</div>
+            <div>
+              <div class="org-name">${escHtml(orgName)}</div>
+              <div class="org-label">Organizador verificado ✓</div>
+            </div>
+          </div>
+          <a href="${ev.eventUrl || '#'}" target="_blank" class="btn btn-outline btn-sm" style="width:100%;justify-content:center">
+            Visitar página oficial →
+          </a>
+        </div>
+      </div>
+
+      <!-- Share -->
+      <div class="sidebar-card">
+        <div class="share-body">
+          <div class="share-title">📤 Compartilhar evento</div>
+          <div class="share-btns">
+            <button class="share-btn" onclick="shareEvent('whatsapp')">💬 WhatsApp</button>
+            <button class="share-btn" onclick="shareEvent('twitter')">🐦 Twitter</button>
+            <button class="share-btn" onclick="copyLink()">🔗 Copiar link</button>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  // ── INTERACTIONS ──────────────────────────────
+  function copyCoupon(code, el) {
+    navigator.clipboard.writeText(code).then(() => {
+      const orig = el.textContent;
+      el.textContent = '✓ Copiado!';
+      el.style.background = 'rgba(45,212,160,0.15)';
+      el.style.color = 'var(--success)';
+      setTimeout(() => {
+        el.textContent = orig;
+        el.style.background = '';
+        el.style.color = '';
+      }, 1800);
+    });
+  }
+
+  function applyCoupon() {
+    const val = document.getElementById('couponInput').value.trim().toUpperCase();
+    const fb  = document.getElementById('couponFeedback');
+    fb.style.display = 'block';
+    const all = Object.values(MOCK_COUPONS).flat();
+    const found = all.find(c => c.code === val);
+    if (found) {
+      fb.textContent = `✓ Cupom aplicado! ${found.discount}% de desconto`;
+      fb.className = 'coupon-feedback success';
+    } else if (!val) {
+      fb.textContent = 'Digite um código de cupom.';
+      fb.className = 'coupon-feedback error';
+    } else {
+      fb.textContent = 'Cupom inválido ou expirado.';
+      fb.className = 'coupon-feedback error';
+    }
+  }
+
+  function shareEvent(platform) {
+    const url = encodeURIComponent(window.location.href);
+    const title = encodeURIComponent(document.title);
+    const urls = {
+      whatsapp: `https://wa.me/?text=${title}%20${url}`,
+      twitter: `https://twitter.com/intent/tweet?text=${title}&url=${url}`,
+    };
+    if (urls[platform]) window.open(urls[platform], '_blank');
+  }
+
+  function copyLink() {
+    navigator.clipboard.writeText(window.location.href).then(() => {
+      showToast('Link copiado para a área de transferência!');
+    });
+  }
+
+  // ── HELPERS ───────────────────────────────────
+  function isUpcoming(date) { return new Date(date) > new Date(); }
+
+  function renderNotFound() {
+    document.getElementById('eventHero').innerHTML = `
+      <div class="loading-state" style="flex-direction:column;gap:10px">
+        <span style="font-size:52px">😕</span>
+        <p>Evento não encontrado</p>
+        <a href="dashboard.html" class="btn btn-outline btn-sm">← Voltar aos eventos</a>
+      </div>`;
+  }
+
+  function renderLoadError() {
+    document.getElementById('eventHero').innerHTML = `
+      <div class="loading-state" style="flex-direction:column;gap:10px">
+        <span style="font-size:52px">⚠️</span>
+        <p style="color:var(--muted)">Não foi possível carregar o evento.</p>
+        <a href="dashboard.html" class="btn btn-outline btn-sm">← Voltar</a>
+      </div>`;
+  }
+
+  function escHtml(str) {
+    if (!str) return '';
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  loadEvent();
+</script>
+</body>
+</html>
